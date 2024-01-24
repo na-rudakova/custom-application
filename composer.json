@@ -1,0 +1,13 @@
+{
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    },
+    "require": {
+        "doctrine/orm": "2.10.0",
+        "doctrine/cache": "^2.2",
+        "symfony/cache": "^5.0.0",
+        "doctrine/annotations": "^1.0.0"
+    }
+}
