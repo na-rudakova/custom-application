@@ -15,14 +15,20 @@ function submit_application($data) {
     $title = sanitize_text_field($data['title']);
     $description = sanitize_text_field($data['description']);
 
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'applications';
+    $entityManager = getEntityManager(); // Добавлено получение EntityManager
 
-    $wpdb->insert($table_name, array(
-        'user_id' => $user_id,
-        'title' => $title,
-        'description' => $description,
-    ));
+    $user = $entityManager->find('Entity\User', $user_id);
+    if (!$user) {
+        return 'Пользователь не найден.';
+    }
+
+    $application = new \Entity\User();
+    $application->setUser($user);
+    $application->setTitle($title);
+    $application->setDescription($description);
+
+    $entityManager->persist($application);
+    $entityManager->flush();
 
     return 'Заявка успешно отправлена!';
 }

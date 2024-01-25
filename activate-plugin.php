@@ -1,20 +1,29 @@
 <?php
 
-register_activation_hook(__FILE__, 'activate_application_plugin');
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+
+require_once "vendor/autoload.php";
 
 function activate_application_plugin() {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-    $table_name = $wpdb->prefix . 'applications';
+    $paths = [__DIR__ . "/lib/Entity"];
+    $isDevMode = true;
 
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        user_id mediumint(9) NOT NULL,
-        title text NOT NULL,
-        description text NOT NULL,
-        PRIMARY KEY (id)
-    ) $charset_collate;";
+    $dbParams = [
+        'driver' => 'pdo_mysql',
+        'user' => DB_USER,
+        'password' => DB_PASSWORD,
+        'dbname' => DB_NAME,
+    ];
 
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
+    $config = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
+    $entityManager = EntityManager::create($dbParams, $config);
+
+    // Получаем платформу Doctrine и создаем таблицу, если она не существует
+    $platform = $entityManager->getConnection()->getDatabasePlatform();
+    $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($entityManager);
+    $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
+    $schemaTool->updateSchema($metadata);
 }
+
+activate_application_plugin();
